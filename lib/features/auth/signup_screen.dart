@@ -278,11 +278,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                               strokeWidth: 2,
                                             ),
                                           )
-                                        : const Text(
-                                            'Join us!',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
+                                        : const Center(
+                                            child: Text(
+                                              'Join us!',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
                                           ),
                                   ),

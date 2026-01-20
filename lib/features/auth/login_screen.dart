@@ -243,11 +243,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                                       strokeWidth: 2,
                                                     ),
                                               )
-                                            : const Text(
-                                                'Log in',
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w600,
+                                            : const Center(
+                                                child: Text(
+                                                  'Log in',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
                                                 ),
                                               ),
                                       ),
@@ -393,13 +396,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       tapTargetSize:
                                           MaterialTapTargetSize.shrinkWrap,
                                     ),
-                                    child: const Text(
-                                      'Join us!',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        height:
-                                            1.0, // Tighten line height to prevent clipping
+                                    child: const Center(
+                                      child: Text(
+                                        'Join us!',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
                                       ),
                                     ),
                                   ),
