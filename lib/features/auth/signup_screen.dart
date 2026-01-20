@@ -262,6 +262,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                         borderRadius: BorderRadius.circular(30),
                                       ),
                                       elevation: 0,
+                                      padding: EdgeInsets
+                                          .zero, // Remove default padding
+                                      alignment:
+                                          Alignment.center, // Ensure centering
                                     ),
                                     child: _isLoading
                                         ? const SizedBox(
@@ -277,6 +281,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                             style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
+                                              height:
+                                                  1.0, // Tighten line height to prevent clipping
                                             ),
                                           ),
                                   ),

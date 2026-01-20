@@ -228,6 +228,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                             ),
                                           ),
                                           elevation: 0,
+                                          padding: EdgeInsets
+                                              .zero, // Remove default padding
+                                          alignment: Alignment
+                                              .center, // Ensure centering
                                         ),
                                         child: _isLoading
                                             ? const SizedBox(
@@ -244,6 +248,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                                 style: TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w600,
+                                                  height:
+                                                      1.0, // Tighten line height to prevent clipping
                                                 ),
                                               ),
                                       ),
@@ -382,12 +388,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         borderRadius: BorderRadius.circular(20),
                                       ),
                                       elevation: 0,
+                                      padding: EdgeInsets
+                                          .zero, // Remove default padding
+                                      alignment:
+                                          Alignment.center, // Ensure centering
                                     ),
                                     child: const Text(
                                       'Join us!',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
+                                        height:
+                                            1.0, // Tighten line height to prevent clipping
                                       ),
                                     ),
                                   ),
