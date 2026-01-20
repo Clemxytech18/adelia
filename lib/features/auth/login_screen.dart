@@ -68,8 +68,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // --- Responsive Dimensions & Constants ---
 
     // 1. Section Heights
-    final greenSectionHeight = size.height * 0.70;
-    final yellowSectionHeight = size.height * 0.15;
+    final greenSectionHeight = isMobile
+        ? size.height * 0.65
+        : size.height * 0.70;
+    final yellowSectionHeight = isMobile
+        ? size.height * 0.22
+        : size.height * 0.15;
 
     // 2. Brand Image Size & Fit
     final double brandImageWidth = isMobile ? 360 : 480;

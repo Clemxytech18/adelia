@@ -142,8 +142,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           height: isMobile ? 196 : 220,
                           fit: isMobile ? BoxFit.contain : BoxFit.fill,
                           opacity: const AlwaysStoppedAnimation(
-                            0.2,
-                          ), // Low opacity for header
+                            1.0,
+                          ), // Full opacity for header
                         ),
                       ),
                     ),
