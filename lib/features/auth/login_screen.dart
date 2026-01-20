@@ -60,6 +60,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Widget _buildResponsiveLayout(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     final isMobile =
         size.width < 800; // Breakpoint for Mobile/Tablet vs Desktop
     final isSmallMobile = size.width < 400;
@@ -308,7 +309,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             // Positioned based on user request "Text in white gap, Button in yellow"
             // We use the yellowSectionHeight as a reference anchor.
             Positioned(
-              bottom: yellowSectionHeight - 70, // Anchor point
+              bottom:
+                  yellowSectionHeight -
+                  70 +
+                  bottomPadding, // Anchor point + Safe Area
               left: 0,
               right: 0,
               child: Center(
