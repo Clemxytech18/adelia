@@ -252,7 +252,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                 // "Join us!" Button
                                 SizedBox(
                                   width: double.infinity,
-                                  height: 40, // Height updated to 40px
+                                  height: 50, // Increased to 50px
                                   child: ElevatedButton(
                                     onPressed: _isLoading ? null : _signup,
                                     style: ElevatedButton.styleFrom(
@@ -332,38 +332,42 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           // Padding bottom pushes it up into the white gap
                           Padding(
                             padding: const EdgeInsets.only(bottom: 40),
-                            child: SizedBox(
-                              width: 200,
-                              child: RichText(
-                                textAlign: TextAlign.start,
-                                text: const TextSpan(
-                                  style: TextStyle(
-                                    color: Color(0xFF333333),
-                                    fontSize: 24,
-                                    height: 1.2,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                  children: [
-                                    TextSpan(text: 'Or '),
-                                    TextSpan(
-                                      text: 'create',
-                                      style: TextStyle(
-                                        color: Color(0xFF449CCE),
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    TextSpan(text: '\nyour '),
-                                    TextSpan(
-                                      text: 'account',
-                                      style: TextStyle(
-                                        color: Color(0xFF449CCE),
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    TextSpan(text: '!'),
-                                  ],
+                            child: Flexible(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 200,
                                 ),
-                              ).animate().fadeIn().slideX(),
+                                child: RichText(
+                                  textAlign: TextAlign.start,
+                                  text: const TextSpan(
+                                    style: TextStyle(
+                                      color: Color(0xFF333333),
+                                      fontSize: 24,
+                                      height: 1.2,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                    children: [
+                                      TextSpan(text: 'Or '),
+                                      TextSpan(
+                                        text: 'create',
+                                        style: TextStyle(
+                                          color: Color(0xFF449CCE),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      TextSpan(text: '\nyour '),
+                                      TextSpan(
+                                        text: 'account',
+                                        style: TextStyle(
+                                          color: Color(0xFF449CCE),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      TextSpan(text: '!'),
+                                    ],
+                                  ),
+                                ).animate().fadeIn().slideX(),
+                              ),
                             ),
                           ),
 

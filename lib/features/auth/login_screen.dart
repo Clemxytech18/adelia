@@ -216,7 +216,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     // Login Button (White Pill)
                                     SizedBox(
                                       width: double.infinity,
-                                      height: 40, // Fixed height per request
+                                      height: 50, // Incedased to 50px
                                       child: ElevatedButton(
                                         onPressed: _isLoading ? null : _login,
                                         style: ElevatedButton.styleFrom(
@@ -379,7 +379,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                                 child: SizedBox(
                                   width: 230, // Keep fixed width
-                                  height: 40,
+                                  height: 50,
                                   child: ElevatedButton(
                                     onPressed: () => context.go('/signup'),
                                     style: ElevatedButton.styleFrom(
