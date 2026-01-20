@@ -17,24 +17,11 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _mobileFormKey = GlobalKey<FormState>();
-  final _webFormKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
   Future<void> _login() async {
-    // Validate whichever form is active?
-    // Easier: Check both or check based on context?
-    // Since we don't know easily which one is built in this method without context size check again,
-    // let's just use the logic:
-    // If we are in the build method, we switch. here we are in a callback.
-    // We can check if `_mobileFormKey.currentState` is mounted/valid, or `_webFormKey.currentState`.
-
-    if (_mobileFormKey.currentState != null) {
-      if (!_mobileFormKey.currentState!.validate()) return;
-    } else if (_webFormKey.currentState != null) {
-      if (!_webFormKey.currentState!.validate()) return;
-    } else {
-      // Should not happen
+    if (_formKey.currentState?.validate() != true) {
       return;
     }
 
@@ -68,30 +55,70 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth > 800) {
-          return _buildWebLayout(context, constraints);
-        } else {
-          return _buildMobileLayout(context, constraints);
-        }
-      },
-    );
+    return _buildResponsiveLayout(context);
   }
 
-  Widget _buildWebLayout(BuildContext context, BoxConstraints constraints) {
+  Widget _buildResponsiveLayout(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final greenSectionHeight = size.height * 0.7;
-    final footerHeight = size.height * 0.15;
+    final isMobile =
+        size.width < 800; // Breakpoint for Mobile/Tablet vs Desktop
+    final isSmallMobile = size.width < 400;
+
+    // --- Responsive Dimensions & Constants ---
+
+    // 1. Section Heights
+    final greenSectionHeight = size.height * 0.70;
+    final yellowSectionHeight = size.height * 0.15;
+
+    // 2. Brand Image Size & Fit
+    final double brandImageWidth = isMobile ? 360 : 480;
+    final double brandImageHeight = isMobile ? 196 : 250;
+    final BoxFit brandImageFit = isMobile ? BoxFit.contain : BoxFit.fill;
+
+    // 3. Form
+    final double formMaxWidth = isMobile ? 340 : 450;
+    // On mobile, we might want to allow scrolling if height is small,
+    // but the design request focuses on fixed layout structure.
+    // We'll keep the Center > SingleChildScrollView pattern for safety on short screens.
+
+    // 4. Bottom Content (Text, Button, Lottie)
+    //    Web: 740px container, 110px padding left
+    //    Mobile: Full width container, reduced padding
+    final double bottomContentMaxWidth = isMobile ? size.width : 740;
+
+    // Padding for Text & Button
+    // Web: 110px. Mobile: 32px (standard margin).
+    final double contentLeftPadding = isMobile ? 32.0 : 110.0;
+
+    // Gap between Text & Button
+    // Web: 60px (Increased to center text in gap).
+    const double textButtonGap = 60.0;
+
+    // Lottie Position
+    // Web: Offset(-80, 60).
+    // Mobile: Needs to be less aggressive to fit on screen.
+    // We'll adjust X offset based on available space.
+    final Offset lottieOffset = isMobile
+        ? const Offset(-20, 60)
+        : const Offset(-80, 60);
+
+    // Lottie Size
+    // On really small mobiles, maybe scale down slightly, otherwise keep 200x280
+    final double lottieWidth = isSmallMobile ? 160 : 200;
+    final double lottieHeight = isSmallMobile ? 224 : 280;
 
     return Scaffold(
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset:
+          false, // Prevent layout resize on keyboard (handled manually if needed, or stick to design)
       body: SizedBox(
         height: size.height,
         width: size.width,
         child: Stack(
           children: [
-            // 1. Top Green Section
+            // ---------------------------------------------------------
+            // 1. TOP GREEN SECTION
+            // ---------------------------------------------------------
             Positioned(
               top: 0,
               left: 0,
@@ -100,15 +127,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Container(
                 clipBehavior: Clip.hardEdge,
                 decoration: const BoxDecoration(
-                  color: AppColors.primary, // #72AE8C
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(80),
-                    bottomRight: Radius.circular(80),
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
                   ),
                 ),
                 child: Stack(
                   children: [
-                    // Brand Background Pattern (Original Size)
+                    // A. Brand Background Pattern
                     Positioned(
                       top: 0,
                       left: 0,
@@ -117,519 +144,280 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         alignment: Alignment.topCenter,
                         child: Image.asset(
                           'assets/images/brand_logo_bg.png',
-                          fit: BoxFit.contain,
+                          width: brandImageWidth,
+                          height: brandImageHeight,
+                          fit: brandImageFit,
+                          opacity: const AlwaysStoppedAnimation(1.0),
                         ),
                       ),
                     ),
 
-                    // Centered Content
+                    // B. Centered Form Content
                     Center(
                       child: Container(
-                        constraints: const BoxConstraints(maxWidth: 500),
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const SizedBox(height: 20),
-                            // Logo
-                            Image.asset(
-                              'assets/images/AdeliaHealth_white.png',
-                              height: 100,
-                              fit: BoxFit.contain,
-                            ).animate().fadeIn().scale(),
+                        constraints: BoxConstraints(maxWidth: formMaxWidth),
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        // Wrap in SingleChildScrollView for safety on short screens/landscape
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Logo
+                              Image.asset(
+                                'assets/images/AdeliaHealth_white.png',
+                                height: isMobile ? 80 : 90,
+                                fit: BoxFit.contain,
+                              ).animate().fadeIn().scale(),
 
-                            const SizedBox(height: 60),
+                              SizedBox(height: isMobile ? 40 : 60),
 
-                            // "Log in" Text
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: RichText(
-                                text: const TextSpan(
+                              // "Log in" Heading
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'Log in',
                                   style: TextStyle(
-                                    fontSize: 32,
+                                    fontSize: isMobile ? 28 : 32,
                                     color: Colors.white,
                                     fontFamily: 'Poppins',
+                                    fontWeight:
+                                        FontWeight.w400, // Regular per design
                                   ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 30),
+
+                              // Form Fields
+                              Form(
+                                key: _formKey,
+                                child: Column(
                                   children: [
-                                    TextSpan(text: 'Log '),
-                                    TextSpan(
-                                      text: 'in',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
+                                    UnderlinedTextField(
+                                      controller: _emailController,
+                                      label: 'Email',
+                                      validator: (value) =>
+                                          value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
+                                    ),
+                                    const SizedBox(height: 24),
+                                    UnderlinedTextField(
+                                      controller: _passwordController,
+                                      label: 'Password',
+                                      isPassword: true,
+                                      validator: (value) =>
+                                          value == null || value.isEmpty
+                                          ? 'Required'
+                                          : null,
+                                    ),
+                                    SizedBox(height: isMobile ? 40 : 48),
+
+                                    // Login Button (White Pill)
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 40, // Fixed height per request
+                                      child: ElevatedButton(
+                                        onPressed: _isLoading ? null : _login,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          foregroundColor: AppColors.primary,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              24,
+                                            ),
+                                          ),
+                                          elevation: 0,
+                                        ),
+                                        child: _isLoading
+                                            ? const SizedBox(
+                                                height: 20,
+                                                width: 20,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      color: AppColors.primary,
+                                                      strokeWidth: 2,
+                                                    ),
+                                              )
+                                            : const Text(
+                                                'Log in',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 16),
+
+                                    // Forgot Password
+                                    TextButton(
+                                      onPressed: () {},
+                                      child: const Text(
+                                        'Forgot password',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w300,
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
-
-                            const SizedBox(height: 30),
-
-                            // Form
-                            Form(
-                              key: _webFormKey,
-                              child: Column(
-                                children: [
-                                  UnderlinedTextField(
-                                    controller: _emailController,
-                                    label: 'Email',
-                                    validator: (value) =>
-                                        value == null || value.isEmpty
-                                        ? 'Required'
-                                        : null,
-                                  ),
-                                  const SizedBox(height: 24),
-                                  UnderlinedTextField(
-                                    controller: _passwordController,
-                                    label: 'Password',
-                                    isPassword: true,
-                                    validator: (value) =>
-                                        value == null || value.isEmpty
-                                        ? 'Required'
-                                        : null,
-                                  ),
-                                  const SizedBox(height: 40),
-
-                                  // Login Button
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                      onPressed: _isLoading ? null : _login,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.white,
-                                        foregroundColor: AppColors.primary,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            30,
-                                          ),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 20,
-                                        ),
-                                        elevation: 0,
-                                      ),
-                                      child: _isLoading
-                                          ? const SizedBox(
-                                              height: 20,
-                                              width: 20,
-                                              child: CircularProgressIndicator(
-                                                color: AppColors.primary,
-                                                strokeWidth: 2,
-                                              ),
-                                            )
-                                          : const Text(
-                                              'Log in',
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 16),
-
-                                  TextButton(
-                                    onPressed: () {},
-                                    child: const Text(
-                                      'Forgot password',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // 2. Bottom Yellow Footer Section
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: footerHeight,
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: AppColors.secondary,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(60),
-                    topRight: Radius.circular(60),
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: SizedBox(
-                  width: 200,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () => context.go('/signup'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFC7A005),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'Join us!',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // 3. Middle Section Content (Or create... and Lottie)
-            Positioned(
-              bottom: footerHeight - 60, // Adjust overlap
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 800),
-                  height: 300, // Increase container height to fit Lottie
-                  child: Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      // Text on Left
-                      Positioned(
-                        left: 50,
-                        bottom: 80,
-                        child: RichText(
-                          textAlign: TextAlign.start,
-                          text: const TextSpan(
-                            style: TextStyle(
-                              color: Color(0xFF333333),
-                              fontSize: 28,
-                              height: 1.2,
-                              fontFamily: 'Poppins',
-                            ),
-                            children: [
-                              TextSpan(text: 'Or '),
-                              TextSpan(
-                                text: 'create',
-                                style: TextStyle(
-                                  color: Color(0xFF449CCE),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              TextSpan(text: '\nyour '),
-                              TextSpan(
-                                text: 'account',
-                                style: TextStyle(
-                                  color: Color(0xFF449CCE),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              TextSpan(text: '!'),
                             ],
                           ),
                         ),
                       ),
-
-                      // Lottie on Right
-                      Positioned(
-                        right: 50,
-                        bottom: 0,
-                        height: 300,
-                        width: 220,
-                        child: Lottie.asset(
-                          'assets/lottie/joinus_nobackground.json',
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMobileLayout(BuildContext context, BoxConstraints constraints) {
-    final size = MediaQuery.of(context).size;
-    final greenSectionHeight = size.height * 0.75;
-    final footerHeight = size.height * 0.15;
-    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SizedBox(
-        height: size.height,
-        width: size.width,
-        child: Stack(
-          children: [
-            // 1. Top Green Section
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: greenSectionHeight,
-              child: Container(
-                clipBehavior: Clip.hardEdge,
-                decoration: const BoxDecoration(
-                  color: AppColors.primary, // #72AE8C
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(60),
-                    bottomRight: Radius.circular(60),
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    // Brand Background Pattern (Original Size)
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: Image.asset(
-                          'assets/images/brand_logo_bg.png',
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-
-                    // Main Content Overlay
-                    SafeArea(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const SizedBox(height: 40),
-                            // Logo
-                            Image.asset(
-                              'assets/images/AdeliaHealth_white.png',
-                              height: 80,
-                              fit: BoxFit.contain,
-                            ).animate().fadeIn().scale(),
-
-                            const SizedBox(height: 60),
-
-                            // "Log in" Text
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: RichText(
-                                text: const TextSpan(
-                                  style: TextStyle(
-                                    fontSize: 32,
-                                    color: Colors.white,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                  children: [
-                                    TextSpan(text: 'Log '),
-                                    TextSpan(
-                                      text: 'in',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 30),
-
-                            // Form
-                            Form(
-                              key:
-                                  _mobileFormKey, // Note: Sharing GlobalKey between layouts might cause issues if hot-switching, but acceptable here
-                              child: Column(
-                                children: [
-                                  UnderlinedTextField(
-                                    controller: _emailController,
-                                    label: 'Email',
-                                    validator: (value) =>
-                                        value == null || value.isEmpty
-                                        ? 'Required'
-                                        : null,
-                                  ),
-                                  const SizedBox(height: 24),
-                                  UnderlinedTextField(
-                                    controller: _passwordController,
-                                    label: 'Password',
-                                    isPassword: true,
-                                    validator: (value) =>
-                                        value == null || value.isEmpty
-                                        ? 'Required'
-                                        : null,
-                                  ),
-                                  const SizedBox(height: 40),
-
-                                  // Login Button (White Pill)
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                      onPressed: _isLoading ? null : _login,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.white,
-                                        foregroundColor: AppColors.primary,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            30,
-                                          ),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 16,
-                                        ),
-                                        elevation: 0,
-                                      ),
-                                      child: _isLoading
-                                          ? const SizedBox(
-                                              height: 20,
-                                              width: 20,
-                                              child: CircularProgressIndicator(
-                                                color: AppColors.primary,
-                                                strokeWidth: 2,
-                                              ),
-                                            )
-                                          : const Text(
-                                              'Log in',
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 16),
-
-                                  TextButton(
-                                    onPressed: () {
-                                      // Forgot password logic
-                                    },
-                                    child: const Text(
-                                      'Forgot password',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
                   ],
                 ),
               ),
             ),
 
-            // 2. Bottom Yellow Footer Section (Hide on keyboard open)
-            if (!isKeyboardOpen)
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: footerHeight,
+            // ---------------------------------------------------------
+            // 2. BOTTOM YELLOW SECTION
+            // ---------------------------------------------------------
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: yellowSectionHeight,
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: AppColors.secondary,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+              ),
+            ),
+
+            // ---------------------------------------------------------
+            // 3. BOTTOM CONTENT OVERLAY (Text, Button, Lottie)
+            // ---------------------------------------------------------
+            // Positioned based on user request "Text in white gap, Button in yellow"
+            // We use the yellowSectionHeight as a reference anchor.
+            Positioned(
+              bottom: yellowSectionHeight - 70, // Anchor point
+              left: 0,
+              right: 0,
+              child: Center(
                 child: Container(
-                  decoration: const BoxDecoration(
-                    color: AppColors.secondary, // #F5CC5C
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(50),
-                      topRight: Radius.circular(50),
-                    ),
+                  constraints: BoxConstraints(
+                    maxWidth: isMobile ? size.width : 800,
                   ),
-                  padding: const EdgeInsets.only(left: 32),
-                  alignment: Alignment.centerLeft,
                   child: SizedBox(
-                    width: 150,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: () => context.go('/signup'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(
-                          0xFFC7A005,
-                        ), // Darker shade
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                    width: bottomContentMaxWidth,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // Left Column: Text & Button
+                        // Expanded to push Lottie to the right if needed, or shared space
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // "Or create..." Text
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  left: contentLeftPadding,
+                                ),
+                                child: SizedBox(
+                                  width: 174,
+                                  height: 56,
+                                  child: RichText(
+                                    textAlign: TextAlign.start,
+                                    text: const TextSpan(
+                                      style: TextStyle(
+                                        color: Color(0xFF333333),
+                                        fontSize: 20,
+                                        height: 1.2,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                      children: [
+                                        TextSpan(text: 'Or '),
+                                        TextSpan(
+                                          text: 'create',
+                                          style: TextStyle(
+                                            color: Color(0xFF449CCE),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        TextSpan(text: '\nyour '),
+                                        TextSpan(
+                                          text: 'account',
+                                          style: TextStyle(
+                                            color: Color(0xFF449CCE),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        TextSpan(text: '!'),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: textButtonGap),
+
+                              // "Join us!" Button
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  left: contentLeftPadding,
+                                ),
+                                child: SizedBox(
+                                  width: 230, // Keep fixed width
+                                  height: 40,
+                                  child: ElevatedButton(
+                                    onPressed: () => context.go('/signup'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFFC7A005),
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      elevation: 0,
+                                    ),
+                                    child: const Text(
+                                      'Join us!',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'Join us!',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+
+                        // Spacer (Dynamic gap)
+                        const Spacer(),
+
+                        // Right Column: Lottie
+                        Transform.translate(
+                          offset: lottieOffset,
+                          child: SizedBox(
+                            height: lottieHeight,
+                            width: lottieWidth,
+                            child: Lottie.asset(
+                              'assets/lottie/joinus_nobackground.json',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ),
               ),
-
-            // 3. "Or create your account!" Text (Hide on keyboard open)
-            if (!isKeyboardOpen)
-              Positioned(
-                left: 32,
-                bottom: footerHeight + 20,
-                child: RichText(
-                  text: const TextSpan(
-                    style: TextStyle(
-                      color: Color(0xFF333333),
-                      fontSize: 20,
-                      height: 1.2,
-                      fontFamily: 'Poppins',
-                    ),
-                    children: [
-                      TextSpan(text: 'Or '),
-                      TextSpan(
-                        text: 'create',
-                        style: TextStyle(
-                          color: Color(0xFF449CCE),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextSpan(text: '\nyour '),
-                      TextSpan(
-                        text: 'account',
-                        style: TextStyle(
-                          color: Color(0xFF449CCE),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextSpan(text: '!'),
-                    ],
-                  ),
-                ).animate().fadeIn(delay: 600.ms).slideX(),
-              ),
-
-            // 4. Lottie Illustration (Hide on keyboard open)
-            if (!isKeyboardOpen)
-              Positioned(
-                right: -20,
-                bottom: 40,
-                height: 300,
-                width: 220,
-                child: Lottie.asset(
-                  'assets/lottie/joinus_nobackground.json',
-                  fit: BoxFit.contain,
-                ),
-              ),
+            ),
           ],
         ),
       ),

@@ -109,9 +109,7 @@ class _DevelopmentHomeScreenState extends ConsumerState<DevelopmentHomeScreen> {
           // Avatar
           const CircleAvatar(
             radius: 18,
-            backgroundImage: NetworkImage(
-              'https://i.pravatar.cc/150?img=1',
-            ), // Placeholder
+            backgroundImage: AssetImage('assets/images/user_avatar.png'),
             backgroundColor: Colors.white24,
           ),
         ],
@@ -171,7 +169,7 @@ class _DevelopmentHomeScreenState extends ConsumerState<DevelopmentHomeScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          ...events.map((e) => _timelineItem(e)).toList(),
+          ...events.map((e) => _timelineItem(e)),
           const SizedBox(height: 12),
           Center(
             child: TextButton(
@@ -196,7 +194,7 @@ class _DevelopmentHomeScreenState extends ConsumerState<DevelopmentHomeScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -257,6 +255,16 @@ class _DevelopmentHomeScreenState extends ConsumerState<DevelopmentHomeScreen> {
   }
 
   Widget _buildNewsSection() {
+    final width = MediaQuery.of(context).size.width;
+    int columnCount;
+    if (width >= 1200) {
+      columnCount = 6;
+    } else if (width >= 768) {
+      columnCount = 5;
+    } else {
+      columnCount = 3;
+    }
+
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFF00A9E0), // Cyan/Blue background
@@ -265,7 +273,7 @@ class _DevelopmentHomeScreenState extends ConsumerState<DevelopmentHomeScreen> {
           topRight: Radius.circular(30),
         ),
       ),
-      padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 60),
+      padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 80),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -278,19 +286,21 @@ class _DevelopmentHomeScreenState extends ConsumerState<DevelopmentHomeScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          // 3 Columns Row
+          // Dynamic Columns Row
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: _newsCard()),
-              const SizedBox(width: 12),
-              Expanded(child: _newsCard()),
-              const SizedBox(width: 12),
-              Expanded(child: _newsCard()),
-            ],
+            children: List.generate(columnCount, (index) {
+              final isLast = index == columnCount - 1;
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(right: isLast ? 0 : 12),
+                  child: _newsCard(),
+                ),
+              );
+            }),
           ),
           const SizedBox(height: 24),
-          // See all button centered (under middle column)
+          // See all button centered
           Center(
             child: TextButton(
               onPressed: () {},
@@ -315,7 +325,7 @@ class _DevelopmentHomeScreenState extends ConsumerState<DevelopmentHomeScreen> {
       child: Column(
         children: [
           Container(
-            height: 140, // Increased height
+            height: 200, // Increased height
             color: Colors.grey.shade300,
             child: const Center(child: Icon(Icons.image, color: Colors.grey)),
           ),
