@@ -266,6 +266,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                           .zero, // Remove default padding
                                       alignment:
                                           Alignment.center, // Ensure centering
+                                      tapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
                                     ),
                                     child: _isLoading
                                         ? const SizedBox(
@@ -281,8 +283,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                             style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
-                                              height:
-                                                  1.0, // Tighten line height to prevent clipping
                                             ),
                                           ),
                                   ),

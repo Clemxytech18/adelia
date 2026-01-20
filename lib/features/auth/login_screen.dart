@@ -248,8 +248,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                                 style: TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w600,
-                                                  height:
-                                                      1.0, // Tighten line height to prevent clipping
                                                 ),
                                               ),
                                       ),
@@ -392,6 +390,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                           .zero, // Remove default padding
                                       alignment:
                                           Alignment.center, // Ensure centering
+                                      tapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
                                     ),
                                     child: const Text(
                                       'Join us!',
