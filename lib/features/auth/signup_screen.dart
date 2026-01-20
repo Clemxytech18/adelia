@@ -253,7 +253,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                 // "Join us!" Button
                                 SizedBox(
                                   width: double.infinity,
-                                  height: 50, // Increased to 50px
+                                  height: 40, // Reduced to 40px
                                   child: ElevatedButton(
                                     onPressed: _isLoading ? null : _signup,
                                     style: ElevatedButton.styleFrom(
@@ -309,84 +309,85 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             // We anchor this Row relative to the visual "Cut" (Yellow Top).
             // Positioned at bottom: yellowSectionHeight puts the bottom on the cut.
             // We want the text ABOVE the cut (in gap) and Lottie hanging BELOW the cut.
+
+            // ---------------------------------------------------------
+            // 3. MIDDLE OVERLAY (Text in White Gap + Lottie Overlap)
+            // ---------------------------------------------------------
+            // Positioned to start at the top of the "Gap" (end of Green)
+            // and allows content to flow downwards.
             Positioned(
-              bottom:
-                  yellowSectionHeight -
-                  20, // Sit slightly into the yellow section (20px) to allow Text padding to push up
+              top: greenSectionHeight,
               left: 0,
               right: 0,
+              // We don't constrain bottom/height here, so Row can expand.
+              // BUT we want the TEXT to be centered in the GAP.
+              // Gap Height = size.height - green(13%) - yellow(70%) = 17%.
               child: Center(
                 child: Container(
                   constraints: BoxConstraints(
                     maxWidth: isMobile ? size.width : 800,
                   ),
                   child: SizedBox(
-                    width: bottomContentMaxWidth, // Use consistent width
+                    width: bottomContentMaxWidth,
                     child: Padding(
-                      padding: EdgeInsets.only(
-                        left: contentLeftPadding,
-                      ), // Align Left like Login
+                      padding: EdgeInsets.only(left: contentLeftPadding),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        // Align Start: Items start at the Top of the Gap.
+                        // We will push the Text down to the center of the Gap using a Container.
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // LEFT: Text
-                          // Padding bottom pushes it up into the white gap
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 40),
-                            child: Flexible(
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 200,
-                                ),
-                                child: RichText(
-                                  textAlign: TextAlign.start,
-                                  text: const TextSpan(
-                                    style: TextStyle(
-                                      color: Color(0xFF333333),
-                                      fontSize: 24,
-                                      height: 1.2,
-                                      fontFamily: 'Poppins',
-                                    ),
-                                    children: [
-                                      TextSpan(text: 'Or '),
-                                      TextSpan(
-                                        text: 'create',
-                                        style: TextStyle(
-                                          color: Color(0xFF449CCE),
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      TextSpan(text: '\nyour '),
-                                      TextSpan(
-                                        text: 'account',
-                                        style: TextStyle(
-                                          color: Color(0xFF449CCE),
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      TextSpan(text: '!'),
-                                    ],
+                          // We wrap it in a Container exactly the height of the Gap
+                          // and align the text to centerLeft within it.
+                          Container(
+                            height: size.height * 0.17, // The White Gap Height
+                            alignment: Alignment.centerLeft,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 200),
+                              child: RichText(
+                                textAlign: TextAlign.start,
+                                text: const TextSpan(
+                                  style: TextStyle(
+                                    color: Color(0xFF333333),
+                                    fontSize: 24,
+                                    height: 1.2,
+                                    fontFamily: 'Poppins',
                                   ),
-                                ).animate().fadeIn().slideX(),
-                              ),
+                                  children: [
+                                    TextSpan(text: 'Or '),
+                                    TextSpan(
+                                      text: 'create',
+                                      style: TextStyle(
+                                        color: Color(0xFF449CCE),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    TextSpan(text: '\nyour '),
+                                    TextSpan(
+                                      text: 'account',
+                                      style: TextStyle(
+                                        color: Color(0xFF449CCE),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    TextSpan(text: '!'),
+                                  ],
+                                ),
+                              ).animate().fadeIn().slideX(),
                             ),
                           ),
 
                           const Spacer(),
 
                           // RIGHT: Lottie
-                          // Translated down to overlap yellow section
-                          // It's in a Row with CrossAxis.end, so it sits on bottom line.
-                          // We Translate Y positive to push it down.
-                          Transform.translate(
-                            offset: const Offset(-20, 80), // Push down 80px
-                            child: SizedBox(
-                              height: lottieHeight,
-                              width: lottieWidth,
-                              child: Lottie.asset(
-                                'assets/lottie/joinus_nobackground.json',
-                                fit: BoxFit.contain,
-                              ),
+                          // Stays as is. It starts at Top of Gap (0) and flows down.
+                          // 224-280px height vs 136px Gap -> overlaps Yellow naturally.
+                          SizedBox(
+                            height: lottieHeight,
+                            width: lottieWidth,
+                            child: Lottie.asset(
+                              'assets/lottie/joinus_nobackground.json',
+                              fit: BoxFit.contain,
                             ),
                           ),
                         ],
