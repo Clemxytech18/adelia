@@ -83,9 +83,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     // Green Header: Small (holds links)
     final greenSectionHeight = size.height * 0.18;
     // Yellow Body: Large (holds form)
-    // We want a gap in between.
-    // Gap: ~15-20%
-    // Yellow Height: Remainder
     final yellowSectionHeight = size.height * 0.65;
 
     // 3. Form Width
