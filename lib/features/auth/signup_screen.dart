@@ -107,6 +107,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         width: size.width,
         child: Stack(
           children: [
+            // Safety Background (Ensures white gap is never transparent)
+            Container(color: Colors.white),
+
             // ---------------------------------------------------------
             // 1. TOP GREEN SECTION (Header)
             // ---------------------------------------------------------
@@ -126,49 +129,104 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ),
                 child: Stack(
                   children: [
-                    // Brand Pattern Removed
-
-                    // Header Content
-                    SafeArea(
+                    // Brand Pattern (Restored)
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
                       child: Align(
-                        alignment: Alignment.topRight,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 16, right: 24),
-                          child: TextButton(
-                            onPressed: () => context.go('/login'),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Text(
-                                  'I already have an account',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Icon(
-                                  Icons.arrow_forward,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ],
-                            ),
-                          ),
+                        alignment: Alignment.topCenter,
+                        child: Image.asset(
+                          'assets/images/brand_logo_bg.png',
+                          width: isMobile ? 360 : 480,
+                          height: isMobile ? 196 : 220,
+                          fit: isMobile ? BoxFit.contain : BoxFit.fill,
+                          opacity: const AlwaysStoppedAnimation(
+                            0.2,
+                          ), // Low opacity for header
                         ),
                       ),
                     ),
 
-                    // Form Content (Moved from Yellow Section)
+                    // Header Content
+                    SafeArea(
+                      bottom: false,
+                      child: Center(
+                        child: TextButton(
+                          onPressed: () => context.go('/login'),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'I already have an account',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.arrow_forward,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ---------------------------------------------------------
+            // 2. BOTTOM YELLOW SECTION (Form Body)
+            // ---------------------------------------------------------
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: yellowSectionHeight,
+              child: Container(
+                clipBehavior: Clip.hardEdge,
+                decoration: const BoxDecoration(
+                  color: AppColors.secondary,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    // Brand Pattern (Bottom)
+                    // Sizes: 360x196 (Mobile), 480x250 (Web)
                     Align(
-                      alignment: Alignment.center,
+                      alignment: Alignment.bottomCenter,
+                      child: Image.asset(
+                        'assets/images/brand_logo_bottom_bg.png',
+                        width: isMobile ? 360 : 480,
+                        height: isMobile ? 196 : 220,
+                        fit: BoxFit.fill,
+                        opacity: const AlwaysStoppedAnimation(1.0),
+                      ),
+                    ),
+
+                    // Form Content
+                    Align(
+                      alignment: Alignment.topCenter,
                       child: Container(
                         constraints: BoxConstraints(maxWidth: formMaxWidth),
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          // Top padding: 60 to clear Lottie overlap
+                          // Bottom padding: Brand Image Height (250) + 20 to avoid overlap
+                          padding: EdgeInsets.only(
+                            top: 60,
+                            bottom: (isMobile ? 196 : 220) + 20,
+                          ),
                           child: Form(
                             key: _formKey,
                             child: Column(
@@ -257,42 +315,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // ---------------------------------------------------------
-            // 2. BOTTOM YELLOW SECTION (Form Body)
-            // ---------------------------------------------------------
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: yellowSectionHeight,
-              child: Container(
-                clipBehavior: Clip.hardEdge,
-                decoration: const BoxDecoration(
-                  color: AppColors.secondary,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    // Brand Pattern (Bottom)
-                    // Sizes: 360x196 (Mobile), 480x250 (Web)
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Image.asset(
-                        'assets/images/brand_logo_bottom_bg.png',
-                        width: isMobile ? 360 : 480,
-                        height: isMobile ? 196 : 220,
-                        fit: BoxFit.fill,
-                        opacity: const AlwaysStoppedAnimation(1.0),
                       ),
                     ),
                   ],
