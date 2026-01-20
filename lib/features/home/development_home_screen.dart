@@ -19,11 +19,27 @@ class _DevelopmentHomeScreenState extends ConsumerState<DevelopmentHomeScreen> {
   String _currentDate = '';
   int _selectedIndex = 0; // For bottom nav
 
+  late Future<List<Map<String, dynamic>>> _newsFuture;
+
   @override
   void initState() {
     super.initState();
     _loadUserData();
     _currentDate = DateFormat('MM/dd').format(DateTime.now());
+    _newsFuture = _fetchNews();
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchNews() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('News')
+          .select('title, description, preview_url')
+          .limit(10);
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      debugPrint('Error fetching news: $e');
+      return [];
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -266,6 +282,7 @@ class _DevelopmentHomeScreenState extends ConsumerState<DevelopmentHomeScreen> {
     }
 
     return Container(
+      width: double.infinity,
       decoration: const BoxDecoration(
         color: Color(0xFF00A9E0), // Cyan/Blue background
         borderRadius: BorderRadius.only(
@@ -286,18 +303,50 @@ class _DevelopmentHomeScreenState extends ConsumerState<DevelopmentHomeScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          // Dynamic Columns Row
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: List.generate(columnCount, (index) {
-              final isLast = index == columnCount - 1;
-              return Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(right: isLast ? 0 : 12),
-                  child: _newsCard(),
-                ),
+          // News Future Builder
+          FutureBuilder<List<Map<String, dynamic>>>(
+            future: _newsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                );
+              }
+              if (snapshot.hasError ||
+                  !snapshot.hasData ||
+                  snapshot.data!.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No news available',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                );
+              }
+
+              final newsList = snapshot.data!;
+              // We take only as many as fit in our columns preference or all of them
+              // User logic seemed to imply a grid or row. The original was a single Row with Expanded items.
+              // For robustness, let's use a Wrap or just stick to the Row logic but limit items.
+              // The original logic generated `columnCount` items.
+              // We should probably show however many we have, up to columnCount.
+              final displayCount = newsList.length < columnCount
+                  ? newsList.length
+                  : columnCount;
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: List.generate(displayCount, (index) {
+                  final item = newsList[index];
+                  final isLast = index == displayCount - 1;
+                  return Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(right: isLast ? 0 : 12),
+                      child: _newsCard(item),
+                    ),
+                  );
+                }),
               );
-            }),
+            },
           ),
           const SizedBox(height: 24),
           // See all button centered
@@ -315,7 +364,21 @@ class _DevelopmentHomeScreenState extends ConsumerState<DevelopmentHomeScreen> {
     );
   }
 
-  Widget _newsCard() {
+  Widget _newsCard(Map<String, dynamic> item) {
+    final title = item['title'] as String? ?? 'No Title';
+    final description = item['description'] as String? ?? '';
+    final imageUrl = item['preview_url'] as String?;
+
+    // Truncate description logic
+    const int maxLength = 50;
+    String displayDescription = description;
+    bool showMore = false;
+
+    if (description.length > maxLength) {
+      displayDescription = '${description.substring(0, maxLength)}...';
+      showMore = true;
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -325,28 +388,66 @@ class _DevelopmentHomeScreenState extends ConsumerState<DevelopmentHomeScreen> {
       child: Column(
         children: [
           Container(
-            height: 200, // Increased height
+            height: 200, // Fixed height for image area
             color: Colors.grey.shade300,
-            child: const Center(child: Icon(Icons.image, color: Colors.grey)),
+            width: double.infinity,
+            child: imageUrl != null && imageUrl.isNotEmpty
+                ? Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Center(
+                      child: Icon(Icons.broken_image, color: Colors.grey),
+                    ),
+                  )
+                : const Center(child: Icon(Icons.image, color: Colors.grey)),
           ),
           Padding(
             padding: const EdgeInsets.all(8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Lorem ipsum',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
-                // Removed const
-                Text(
-                  'Lorem ipsum dolor sit amet...',
-                  style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
-                  maxLines: 3,
+                // Description with "more" link
+                RichText(
+                  maxLines: 4,
                   overflow: TextOverflow.ellipsis,
+                  text: TextSpan(
+                    style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+                    children: [
+                      TextSpan(text: displayDescription),
+                      if (showMore) ...[
+                        const TextSpan(text: ' '),
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          child: InkWell(
+                            onTap: () {
+                              // Handle "more" tap - currently just print or no-op
+                              debugPrint('Read more clicked for: $title');
+                            },
+                            child: const Text(
+                              'more',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ],
             ),
