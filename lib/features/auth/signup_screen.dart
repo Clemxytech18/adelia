@@ -252,7 +252,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                 // "Join us!" Button
                                 SizedBox(
                                   width: double.infinity,
-                                  height: 50, // Increased to 50px
+                                  height: 40,
                                   child: ElevatedButton(
                                     onPressed: _isLoading ? null : _signup,
                                     style: ElevatedButton.styleFrom(
@@ -283,7 +283,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                               'Join us!',
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
-                                                fontSize: 16,
+                                                fontSize: 14,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
