@@ -382,12 +382,18 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           // RIGHT: Lottie
                           // Stays as is. It starts at Top of Gap (0) and flows down.
                           // 224-280px height vs 136px Gap -> overlaps Yellow naturally.
-                          SizedBox(
-                            height: lottieHeight,
-                            width: lottieWidth,
-                            child: Lottie.asset(
-                              'assets/lottie/joinus_nobackground.json',
-                              fit: BoxFit.contain,
+                          Transform.translate(
+                            offset: const Offset(
+                              0,
+                              -40,
+                            ), // Raise by 40px to overlap white gap more
+                            child: SizedBox(
+                              height: lottieHeight,
+                              width: lottieWidth,
+                              child: Lottie.asset(
+                                'assets/lottie/joinus_nobackground.json',
+                                fit: BoxFit.contain,
+                              ),
                             ),
                           ),
                         ],
