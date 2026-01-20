@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lottie/lottie.dart';
-
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/constants/app_colors.dart';
 import '../shared/underlined_text_field.dart';
 
@@ -81,9 +81,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     // 1. Section Heights
     // Green Header: Small (holds links)
-    final greenSectionHeight = size.height * 0.18;
+    // Green Header: Small (holds links)
+    final greenSectionHeight = size.height * 0.13;
     // Yellow Body: Large (holds form)
-    final yellowSectionHeight = size.height * 0.65;
+    // We want a gap in between.
+    // Gap: ~17%
+    // Yellow Height: Remainder
+    final yellowSectionHeight = size.height * 0.70;
 
     // 3. Form Width
     final double formMaxWidth = isMobile ? 340 : 450;
@@ -104,9 +108,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         width: size.width,
         child: Stack(
           children: [
-            // Safety Background (Ensures white gap is never transparent)
-            Container(color: Colors.white),
-
             // ---------------------------------------------------------
             // 1. TOP GREEN SECTION (Header)
             // ---------------------------------------------------------
@@ -126,24 +127,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ),
                 child: Stack(
                   children: [
-                    // Brand Pattern (Restored)
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: Image.asset(
-                          'assets/images/brand_logo_bg.png',
-                          width: isMobile ? 360 : 480,
-                          height: isMobile ? 196 : 220,
-                          fit: isMobile ? BoxFit.contain : BoxFit.fill,
-                          opacity: const AlwaysStoppedAnimation(
-                            1.0,
-                          ), // Full opacity for header
-                        ),
-                      ),
-                    ),
+                    // Brand Pattern Removed
 
                     // Header Content
                     SafeArea(
@@ -158,7 +142,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                 'I already have an account',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 16,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                   fontFamily: 'Poppins',
                                 ),
@@ -167,7 +151,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               Icon(
                                 Icons.arrow_forward,
                                 color: Colors.white,
-                                size: 18,
+                                size: 16,
                               ),
                             ],
                           ),
@@ -269,7 +253,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                 // "Join us!" Button
                                 SizedBox(
                                   width: double.infinity,
-                                  height: 40,
+                                  height: 50, // Increased to 50px
                                   child: ElevatedButton(
                                     onPressed: _isLoading ? null : _signup,
                                     style: ElevatedButton.styleFrom(
@@ -300,7 +284,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                               'Join us!',
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
-                                                fontSize: 14,
+                                                fontSize: 16,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
@@ -383,7 +367,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                       TextSpan(text: '!'),
                                     ],
                                   ),
-                                ),
+                                ).animate().fadeIn().slideX(),
                               ),
                             ),
                           ),
