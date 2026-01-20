@@ -389,8 +389,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             child: Transform.translate(
                               offset: const Offset(
                                 0,
-                                60,
-                              ), // Push down by 60px to overlap yellow section (matching Login)
+                                110,
+                              ), // Push down by 110px
                               child: SizedBox(
                                 height: lottieHeight,
                                 width: lottieWidth,
